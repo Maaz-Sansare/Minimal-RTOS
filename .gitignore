@@ -4,6 +4,9 @@ zephyrproject/bootloader
 zephyrproject/modules
 zephyrproject/tools
 zephyrproject/zephyr
+zephyrproject/*/build
+zephyrproject/stm32f407_ozone.jdebug.user
+zephyrproject/stm32f407_ozone.jdebug
 
 # Prerequisites
 *.d
