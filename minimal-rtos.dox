@@ -1,0 +1,64 @@
+/**
+ * @mainpage Minimal Portable RTOS
+ *
+ * @section intro_sec Introduction
+ *
+ * This project implements a **minimal, portable real-time operating system (RTOS)**
+ * designed for ARM Cortex-M and other microcontrollers.  
+ * The RTOS is structured in three layers:
+ *
+ * - **Application Layer**: Public API for task creation, delays, and yielding.
+ * - **Kernel Core**: MCU-agnostic task management, scheduling, and delay handling.
+ * - **Port Layer**: MCU/architecture-specific code for context switching, stack initialization,
+ *   SysTick setup, and critical sections.
+ *
+ * The RTOS is designed to be easily portable across multiple microcontrollers by
+ * implementing only the port layer for a new MCU.
+ *
+ * @section features_sec Features
+ *
+ * - Preemptive multitasking via SysTick and PendSV.
+ * - Round-robin scheduler (priority-based scheduling optional).
+ * - Task creation with individual stacks.
+ * - Task delays (`os_delay`) and voluntary yield (`os_yield`).
+ * - Basic synchronization primitives (semaphores optional).
+ * - Fully modular: Kernel is MCU-independent.
+ * - Portable: Port layer isolates hardware-specific code.
+ *
+ * @section layers_sec Layered Architecture
+ *
+ * @image html rtos_layers.png
+ *
+ * **Description of layers:**
+ * - **Application Layer:** User-facing API (`os.h`) for creating tasks and controlling execution.
+ * - **Kernel Core:** Implements task control blocks (TCBs), scheduler, tick handler, and
+ *   delay/blocking logic. (`kernel.h`)
+ * - **Port Layer:** Provides MCU-specific implementations of stack initialization, context switching,
+ *   SysTick timer setup, and critical section handling. (`port.h`)
+ *
+ * @section getting_started_sec Getting Started
+ *
+ * 1. Include `os.h` in your project.
+ * 2. Implement the port layer for your target MCU (or use existing STM32 port).
+ * 3. Initialize the RTOS using `os_init()`.
+ * 4. Create tasks using `os_create_task()`.
+ * 5. Start the scheduler with `os_start()`.
+ *
+ * Example:
+ * @code
+ * os_init();
+ *
+ * static uint32_t task1_stack[128];
+ * os_create_task(task1_func, NULL, 1, task1_stack, 128);
+ *
+ * os_start(); // never returns
+ * @endcode
+ *
+ * @section author_sec Author
+ *
+ * Maaz Sansare
+ *
+ * @section license_sec License
+ *
+ * MIT License
+ */
