@@ -38,18 +38,31 @@ void _os_task_init(tcb_t *tcb, void (*task)(void *), void *arg, uint8_t priority
 }
 
 tcb_t* _os_scheduler_pick_next(void) {
-    uint8_t next_task = __currentTask;
-    // Iterate through all tasks to find the next ready one (round-robin)
-    for (uint8_t i = 1; i <= __taskCount; i++) {
-        next_task = (__currentTask + i) % __taskCount;
-        // The idle task (task 0) is always considered ready.
-        if (__tasks[next_task].state == TASK_READY || next_task == 0) {
-            __currentTask = next_task;
+    uint8_t highest_prio = IDLE_TASK_PRIO;
+
+    // 1. Find the highest priority level among all READY tasks
+    for (uint8_t i = 0; i < __taskCount; i++) {
+        if (__tasks[i].state == TASK_READY) {
+            if (__tasks[i].priority < highest_prio) {
+                highest_prio = __tasks[i].priority;
+            }
+        }
+    }
+
+    // 2. Find the next READY task at that highest priority level (for round-robin)
+    uint8_t search_idx = __currentTask;
+    for (uint8_t i = 0; i < __taskCount; i++) {
+        search_idx = (__currentTask + 1 + i) % __taskCount;
+
+        if (__tasks[search_idx].state == TASK_READY && __tasks[search_idx].priority == highest_prio) {
+            __currentTask = search_idx;
             return &__tasks[__currentTask];
         }
     }
-    // This part should theoretically not be reached if the idle task is present.
-    return &__tasks[__currentTask];
+
+    // This should never be reached if the idle task is always ready, but it's a safe fallback.
+    __currentTask = 0; // Default to idle task
+    return &__tasks[0];
 }
 
 void _os_trigger_context_switch(void) {
