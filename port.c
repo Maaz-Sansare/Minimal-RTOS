@@ -18,7 +18,7 @@ uint32_t* port_stack_init(void (*task)(void*), void* arg, uint32_t* top_of_stack
     // ARM Cortex-M exception stack frame: push initial xPSR, PC, LR, R12, R3-R0
     *(--sp) = 0x01000000;           // xPSR (Thumb bit set)
     *(--sp) = (uint32_t)task;       // PC → task entry
-    // NOTE: We don't need a specific LR value here because the context switcher will save/restore it.
+
     *(--sp) = 0;                    // LR
     *(--sp) = 0x00000012;           // R12
     *(--sp) = 0x00000003;           // R3
@@ -26,7 +26,6 @@ uint32_t* port_stack_init(void (*task)(void*), void* arg, uint32_t* top_of_stack
     *(--sp) = 0x00000001;           // R1
     *(--sp) = (uint32_t)arg;        // R0 → argument
 
-    // For the robust context switcher, we also pre-stack LR and R4-R11
     *(--sp) = 0xFFFFFFFD;           // LR (EXC_RETURN to thread mode, using PSP)
 
     // Initialize callee-saved registers R4-R11 to 0
@@ -36,11 +35,6 @@ uint32_t* port_stack_init(void (*task)(void*), void* arg, uint32_t* top_of_stack
     return sp;
 }
 
-/*
- * A robust, standard-compliant way to start the first task.
- * This function sets up the PSP and then uses the exception return
- * mechanism to have the CPU correctly restore the task's context.
- */
 __attribute__((naked)) void port_start_first_task(void)
 {
     __asm volatile(
@@ -61,10 +55,6 @@ __attribute__((naked)) void port_start_first_task(void)
     );
 }
 
-/*
- * A robust context switcher that saves and restores LR along with
- * other callee-saved registers. This is safer and standard practice.
- */
 __attribute__((naked)) void PendSV_Handler(void)
 {
     __asm volatile(
@@ -114,7 +104,6 @@ void port_sys_tick_init(uint32_t tick_hz)
 {
     // SystemCoreClock must be defined in STM32Cube HAL
     SysTick_Config(SystemCoreClock / tick_hz);
-
     // Set PendSV to lowest priority for context switching
     NVIC_SetPriority(PendSV_IRQn, 0xFF);
     // Set SysTick to slightly higher priority than PendSV

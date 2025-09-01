@@ -1,7 +1,6 @@
 #include "kernel.h"
 #include "port.h"
 #include "os.h"
-#include "stm32f4xx.h"  // for SysTick and NVIC definitions
 
 #define IDLE_TASK_PRIO 255 // The lowest possible priority
 
